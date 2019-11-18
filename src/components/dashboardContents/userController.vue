@@ -2,7 +2,7 @@
     <v-container>   
         <v-card>
             <v-container grid-list-md mb-0>
-                <h2 class="text-md-center">Data sparepart</h2> 
+                <h2 class="text-md-center">Data User</h2> 
                 <v-layout row wrap style="margin:10px">
                     <v-flex xs6>
                         <v-btn depressed 
@@ -13,7 +13,7 @@
                         @click="dialog = true"
                         >
                         <v-icon size="18" class="mr-2">mdi-pencil-plus</v-icon> 
-                            Tambah sparepart
+                            Tambah User
                         </v-btn>
                     </v-flex>
                     <v-flex xs6 class="text-right">
@@ -28,7 +28,7 @@
 
                 <v-data-table
                     :headers="headers"
-                    :items="spareparts"
+                    :items="users"
                     :search="keyword"
                     :loading="load"
                 >
@@ -38,9 +38,8 @@
                         <tr v-for="(item,index) in items" :key="item.id"> 
                             <td>{{ index + 1 }}</td>
                             <td>{{ item.name }}</td>
-                            <td>{{ item.merk}}</td>
-                            <td>{{ item.amount}}</td>
-                            <td>{{ item.created_at}}</td>
+                            <td>{{ item.email}}</td>
+                            <td>{{ item.password }}</td>
                             <td class="text-center">
                                 <v-btn 
                                 icon 
@@ -67,7 +66,7 @@
     </v-card>
     <v-dialog v-model="dialog" persistent max-width="600px"> <v-card>
         <v-card-title>
-            <span class="headline">Sparepart</span>
+            <span class="headline">User Profile</span>
         </v-card-title>
         <v-card-text>
             <v-container>
@@ -76,10 +75,10 @@
                         <v-text-field label="Name*" v-model="form.name" required></v-text-field>
                     </v-col>
                     <v-col cols="12">
-                        <v-text-field label="merk*" v-model="form.merk" required></v-text-field> 
+                        <v-text-field label="Email*" v-model="form.email" required></v-text-field> 
                     </v-col>
                     <v-col cols="12">
-                        <v-text-field label="amount*" v-model="form.amount" required></v-text-field>
+                        <v-text-field label="Password*" v-model="form.password" type="password" required></v-text-field>
                     </v-col>
                 </v-row>
             </v-container>
@@ -127,31 +126,29 @@ export default {
                     value: 'name'
                     },
                     {
-                    text: 'Merk',
-                    value: 'merk'
+                    text: 'Email',
+                    value: 'email'
                     },
                     {
-                    text: 'Amount',
-                    value: 'amount'
+                    text: 'Password',
+                    value: 'password'
                     },
-
                     {
                     text: 'Aksi',
                     value: null
                     },  
             ],
-            spareparts: [],
+            users: [],
             snackbar: false,
             color: null,
             text: '',
             load: false,
             form: {
                 name : '',
-                merk : '',
-                amount : '',
-        
+                email : '',
+                password : ''
             },
-            sparepart : new FormData,
+            user : new FormData,
             typeInput: 'new',
             errors : '',
             updatedId : '',
@@ -159,26 +156,25 @@ export default {
     },
     methods:{
         getData(){
-            var uri = this.$apiUrl + '/sparepart'
+            var uri = this.$apiUrl + '/user'
             this.$http.get(uri).then(response =>{
-                this.spareparts=response.data.message
+                this.users=response.data.message
         })
     },
 
         sendData(){
-            this.sparepart.append('name', this.form.name);
-            this.sparepart.append('merk', this.form.merk);
-            this.sparepart.append('amount', this.form.amount);
-    
-            var uri =this.$apiUrl + '/sparepart'
+            this.user.append('name', this.form.name);
+            this.user.append('email', this.form.email);
+            this.user.append('password', this.form.password);
+            var uri =this.$apiUrl + '/user'
             this.load = true
-            this.$http.post(uri,this.sparepart).then(response =>{
+            this.$http.post(uri,this.user).then(response =>{
                 this.snackbar = true; //mengaktifkan snackbar
                 this.color = 'green'; //memberi warna snackbar
                 this.text = response.data.message; //memasukkan pesan ke snackbar
                 this.load = false;
                 this.dialog = false
-                this.getData(); //mengambil data sparepart
+                this.getData(); //mengambil data user
                 this.resetForm();
             }).catch(error =>{
                 this.errors = error
@@ -190,18 +186,17 @@ export default {
     },
 
         updateData(){
-            this.sparepart.append('name', this.form.name);
-            this.sparepart.append('merk', this.form.merk);
-            this.sparepart.append('amount', this.form.amount);
-
-            var uri = this.$apiUrl + '/sparepart/' + this.updatedId;
+            this.user.append('name', this.form.name);
+            this.user.append('email', this.form.email);
+            this.user.append('password', this.form.password);
+            var uri = this.$apiUrl + '/user/' + this.updatedId;
             this.load = true
-            this.$http.post(uri,this.sparepart).then(response =>{
+            this.$http.post(uri,this.user).then(response =>{
                 this.snackbar = true; //mengaktifkan snackbar this.color = 'green'; //memberi warna snackbar
                 this.text = response.data.message; //memasukkan pesan ke snackbar
                 this.load = false;
                 this.dialog = false
-                this.getData(); //mengambil data sparepart
+                this.getData(); //mengambil data user
                 this.resetForm();
                 this.typeInput = 'new';
             }).catch(error =>{
@@ -218,14 +213,13 @@ export default {
             this.typeInput = 'edit';
             this.dialog = true;
             this.form.name = item.name;
-            this.form.merek = item.merek;
-            this.form.amount = item.merek;
-  
+            this.form.email = item.email;
+            this.form.password = '',
             this.updatedId = item.id
     },
-
+    
         deleteData(deleteId){
-            var uri=this.$apiUrl + '/sparepart/' + deleteId;
+            var uri=this.$apiUrl + '/user/' + deleteId;
             this.$http.delete(uri).then(response =>{
                 this.snackbar=true;
                 this.text=response.data.message;
@@ -251,9 +245,8 @@ export default {
         resetForm(){
             this.form = {
                 name : '',
-                merek : '',
-                amount : '',
-            
+                email : '',
+                password : ''
             }
         }
     },
